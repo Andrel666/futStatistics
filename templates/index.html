@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Statistics</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Football Statistics</h1>
+    </header>
+
+    <section id="country-selection">
+        <form id="country-form">
+            <label><input type="radio" name="country" value="BR" checked> Brazil</label>
+            <label><input type="radio" name="country" value="IT"> Italy</label>
+            <label><input type="radio" name="country" value="DE"> Germany</label>
+            <label><input type="radio" name="country" value="ES"> Spain</label>
+            <label><input type="radio" name="country" value="ENG"> England</label>
+        </form>
+    </section>
+
+    <nav>
+        <ul>
+            <li><a href="#" onclick="fetchTeams()">Get Teams</a></li>
+            <li><a href="#" onclick="fetchGames()">Get Games</a></li>
+            <li><a href="#" onclick="exportTableData()" style="display: none;">Export</a></li>
+            <li><a href="#" onclick="generateStatistics()">Calculate</a></li>
+            <li>
+                <input type="file" id="csv-file" accept=".csv" onchange="loadTeamsFromCSV(event)">
+            </li>
+            <li>
+                <button onclick="saveTeamsToCSV()">Save Teams to CSV</button>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Table to display fetched data -->
+    <section>
+        <table id="file-table" border="1">
+            <thead>
+                <tr id="table-header"></tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </section>
+
+    <script>
+        function getSelectedCountry() {
+            const country = document.querySelector('input[name="country"]:checked').value;
+            return country;
+        }
+
+        function fetchTeams() {
+            const country = getSelectedCountry();  // Get the selected country
+            fetch(`/get_teams?country=${country}`)
+                .then(response => response.json())
+                .then(data => {
+                    createTableHeader(['Logo', 'Position', 'Name', 'Points', 'Type']);
+                    createTableRows(data, `teams`);
+                });
+        }
+
+        function fetchGames() {
+            const country = getSelectedCountry();  // Get the selected country
+            fetch(`/get_games?country=${country}`)
+                .then(response => response.json())
+                .then(data => {
+                    createTableHeader(['Home Team', 'Score', 'Away Team']);
+                    createTableRows(data, `games`);
+                });
+        }
+
+        function createTableHeader(headers) {
+            const headerRow = document.getElementById('table-header');
+            headerRow.innerHTML = '';  // Clear previous headers
+
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+        }
+
+        function createTableRows(data, activity) {
+            const tableBody = document.getElementById('table-body');
+            const country = getSelectedCountry();  // Get the selected country
+
+            tableBody.innerHTML = '';  // Clear previous table rows
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                //console.log(data)
+                if (activity == `teams`) {
+                    const logoUrl = `https://images.fotmob.com/image_resources/logo/teamlogo/${item.id}_small.png`; // Adjust your image path as needed
+                    row.innerHTML = `
+                        <td><img src="${logoUrl}" alt="Team Logo" width="30"></td>
+                        <td>${item.idx}</td>
+                        <td>${item.name}</td>
+                        <td>${item.pts}</td>
+                        <td><input type="number" min="1" max="5" value="${item.type}"></td>
+                    `;
+                } else if (activity == `games`) {
+                    const homeLogoUrl = `https://images.fotmob.com/image_resources/logo/teamlogo/${item.homeID}_small.png`;
+                    const awayLogoUrl = `https://images.fotmob.com/image_resources/logo/teamlogo/${item.awayID}_small.png`;
+                    row.innerHTML = `
+                        <td class="home-team">${item.home} <img src="${homeLogoUrl}" alt="Home Team Logo" width="30"></td>
+                        <td>${item.score}</td>
+                        <td class="away-team"><img src="${awayLogoUrl}" alt="Away Team Logo" width="30"> ${item.away}</td>
+                    `;
+                } else  {
+                    let preLibertadoresCell = '';
+                    if (country === 'BR') {
+                        preLibertadoresCell = `<td>${item.preLibertadores}</td>`;
+                    }
+                    row.innerHTML = `
+                        <td>${item.team}</td>
+                        <td>${item.Champion}</td>
+                        <td>${item.ContinentalLeague}</td>
+                        ${preLibertadoresCell}
+                        <td>${item.secondContLeague}</td>
+                        <td>${item.Relegated}</td>
+                    `;
+                }
+                tableBody.appendChild(row);
+            });
+        }
+
+        function loadTeamsFromCSV(event) {
+
+            const file = event.target.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            const country = getSelectedCountry();  // Get the selected country
+            fetch(`/load_teams_from_csv?country=${country}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                createTableHeader(['Logo', 'Position', 'Name', 'Points', 'Type']);
+                createTableRows(data, `teams`);
+            });
+        }
+
+        function saveTeamsToCSV() {
+            const rows = document.querySelectorAll('#file-table tbody tr');
+            const data = [];
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const id = cells[0].querySelector('img').src.split('/').slice(-1)[0].split('_')[0]; // Get team ID from logo URL
+                const type = cells[4].querySelector('input').value;
+
+                data.push({ id, type });
+            });
+
+            fetch('/save_teams_to_csv', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ teams: data })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = 'teams.csv';
+                link.click();
+            });
+        }
+
+        function generateStatistics() {
+            const country = getSelectedCountry();  // Get the selected country
+            const country_data = { country };  // Create an object with the selected country
+
+            const rows = document.querySelectorAll('#file-table tbody tr');
+            const data = [];
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const id = cells[0].querySelector('img').src.split('/').slice(-1)[0].split('_')[0]; // Get team ID from logo URL
+                const type = cells[4].querySelector('input').value;
+
+                data.push({ id, type });
+            });
+
+            fetch('/statistics', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ country: country_data, teams: data })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();  // Parse JSON from the response
+                })
+                .then(data => {
+                    if ( country == 'BR' ) {
+                    createTableHeader(['Time', 'Campeao', 'Libertadores', 'pre-Libertadores', 'Sul Americana', 'Rebaixado']);
+                    } else {
+                    createTableHeader(['Team', 'Champion', 'Champoins League', 'Europe League', 'Relegated']);
+                    }
+                    //console.log(data);  // Log the received data
+                    createTableRows(data, `statistic`);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+
+
+        function exportTableData() {
+            const country = getSelectedCountry();  // Get the selected country
+            const data = { country };  // Create an object with the selected country
+
+            fetch('/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)  // Send the country in the request body
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();  // Parse JSON from the response
+                })
+                .then(data => {
+                    createTableHeader(['Team', 'Campeao', 'Libertadores', 'pre-Libertadores', 'Sul Americana', 'Rebaixado']);
+                    //console.log(data);  // Log the received data
+                    createTableRows(data, `statistic`);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+        function exportTableData2() {
+            const rows = document.querySelectorAll('#file-table tbody tr');
+            const data = [];
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                let rowData = {};
+
+                if (cells.length === 5) {
+                    rowData['shortName'] = cells[2].textContent.trim();
+                    rowData['position'] = cells[1].textContent.trim();
+                    rowData['pts'] = cells[3].textContent.trim();
+                    rowData['type'] = cells[4].querySelector('input').value;
+                } else if (cells.length === 3) {
+                    rowData['home'] = cells[0].textContent.trim();
+                    rowData['score'] = cells[1].textContent.trim();
+                    rowData['away'] = cells[2].textContent.trim();
+                }
+
+                data.push(rowData);
+            });
+
+            fetch('/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Export successful:', result);
+            });
+        }
+    </script>
+</body>
+</html>

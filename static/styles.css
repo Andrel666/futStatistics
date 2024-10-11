@@ -1,0 +1,142 @@
+/* Basic reset for better consistency */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    color: #333;
+}
+
+header p {
+    font-size: 1.2em;
+    color: #666;
+}
+
+#country-selection {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#country-selection h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+#country-selection label {
+    margin: 0 10px;
+    font-size: 1.1em;
+}
+
+nav {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+nav ul li a,
+nav ul li button {
+    text-decoration: none;
+    font-size: 1.2em;
+    color: #0066cc;
+    padding: 10px 15px;
+    background-color: #e6e6e6;
+    border: none; /* Remove button border */
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    cursor: pointer; /* Make it look like a button */
+}
+
+nav ul li a:hover,
+nav ul li button:hover {
+    background-color: #0066cc;
+    color: white;
+}
+
+/* Style for the file input to make it look like a button */
+input[type="file"] {
+    display: inline-block; /* Keep the file input inline */
+    margin: 0 15px; /* Spacing similar to buttons */
+    padding: 10px; /* Padding for a better appearance */
+    font-size: 1.2em; /* Match font size with buttons */
+    background-color: #e6e6e6; /* Same background color as buttons */
+    color: #0066cc; /* Same text color as buttons */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Match the rounded corners */
+    cursor: pointer; /* Change cursor to pointer */
+    transition: background-color 0.3s ease; /* Transition for hover effect */
+}
+
+/* To visually match button hover effect */
+input[type="file"]:hover {
+    background-color: #0066cc;
+    color: white;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    vertical-align: middle; /* Vertically center content */
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+td {
+    background-color: white;
+}
+
+img {
+    vertical-align: middle; /* Center image vertically within the cell */
+}
+
+
+.home-team {
+    justify-content: flex-end;  /* Align home team to the right */
+    text-align: right;          /* Text-align for the text */
+}
+
+.away-team {
+    justify-content: flex-start; /* Align away team to the left */
+    text-align: left;            /* Text-align for the text */
+}
+
+/* Additional section styling */
+section {
+    margin-top: 20px;
+    text-align: center;
+}
