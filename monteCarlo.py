@@ -87,7 +87,7 @@ def simulate_match(home_strength, away_strength, home_type, away_type):
         return "away_win"
 
 
-def simulate_season(teams, matches, country, n_iterations=100 ):
+def simulate_season(teams, matches, country, n_iterations=100000 ):
     # Default positions if none are provided
     positions = leagues_positions.get(country)
     if country is None:
