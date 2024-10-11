@@ -140,3 +140,6 @@ section {
     margin-top: 20px;
     text-align: center;
 }
+.loading {
+    cursor: wait; /* Change cursor to hourglass/loading */
+}
