@@ -93,6 +93,7 @@ input[type="file"] {
     border-radius: 5px; /* Match the rounded corners */
     cursor: pointer; /* Change cursor to pointer */
     transition: background-color 0.3s ease; /* Transition for hover effect */
+    width:90%
 }
 
 /* To visually match button hover effect */
@@ -233,19 +234,6 @@ section {
             pointer-events: none;
             opacity: 0.6;
         }
-        .file-upload {
-            display: inline-flex; /* Keep it inline with other items */
-            align-items: center; /* Center content vertically */
-            padding: 10px 15px; /* Same padding as buttons */
-            background-color: #e6e6e6; /* Match button background */
-            color: #0066cc; /* Match button text color */
-            border-radius: 5px; /* Rounded corners */
-            cursor: pointer; /* Pointer on hover */
-            transition: background-color 0.3s ease; /* Transition effect */
-            width: 90%;
-        }
-
-        .file-upload:hover {
-            background-color: #0066cc; /* Change background on hover */
-            color: white; /* Change text color on hover */
+        .hidden {
+            display: none; /* Hides the element */
         }
