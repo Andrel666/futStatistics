@@ -139,6 +139,11 @@ img {
     justify-content: flex-start; /* Align away team to the left */
     text-align: left;            /* Text-align for the text */
 }
+.score {
+    display: flex; /* Make the parent a flex container */
+    justify-content: center; /* Center the content */
+    text-align: left; /* Align text to the left within the item */
+}
 
 /* Additional section styling */
 section {
