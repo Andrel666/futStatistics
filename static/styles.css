@@ -46,11 +46,15 @@ header p {
 nav {
     text-align: center;
     margin-bottom: 20px;
+
 }
 
 nav ul {
     list-style: none;
     padding: 0;
+    display: flex; /* Use flexbox for horizontal alignment */
+    justify-content: center; /* Center items */
+    align-items: center; /* Align items vertically */
 }
 
 nav ul li {
@@ -143,3 +147,89 @@ section {
 .loading {
     cursor: wait; /* Change cursor to hourglass/loading */
 }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 15px 0;
+            border-radius: 8px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+        section, nav {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        label {
+            margin-right: 15px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 5px 10px;
+        }
+        nav ul li button,
+        nav ul li a {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        nav ul li a:hover,
+        nav ul li button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        img {
+            max-width: 30px;
+            height: auto;
+        }
+        @media (max-width: 600px) {
+            nav ul li {
+                flex: 1 1 100%; /* Stack items vertically */
+                margin-bottom: 10px;
+            }
+            table, th, td {
+                font-size: 14px;
+            }
+            h1 {
+                font-size: 1.5em; /* Adjust heading size on small screens */
+            }
+        }
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
