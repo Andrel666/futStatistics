@@ -87,7 +87,7 @@ def simulate_match(home_strength, away_strength, home_type, away_type):
         return "away_win"
 
 
-def simulate_season(teams, matches, country, n_iterations=100000 ):
+def simulate_season(teams, matches, country, n_iterations=50000 ):
     # Default positions if none are provided
     positions = leagues_positions.get(country)
     if country is None:
@@ -147,15 +147,19 @@ def simulate_season(teams, matches, country, n_iterations=100000 ):
             results[team][f"{position_name}_description"] = position_data["description"]
 
 
-    return format_results(results)
+    results =  format_results(results, teams)
+
+    return results
 
 
-def format_results(results):
+def format_results(results, teams):
     formatted_results = []
+    team_id_map = {team['shortName']: team['id'] for team in teams}
 
     for team, data in results.items():
         # Create a dictionary for each team
         formatted_team_data = {'team': team}
+        formatted_team_data['id'] = team_id_map.get(team, None)
 
         # Loop over each position and add its description and probability to the dictionary
         # Loop over each position and add its description and probability to the dictionary
@@ -170,8 +174,21 @@ def format_results(results):
 
         # Add the team's formatted data to the list
         formatted_results.append(formatted_team_data)
+        sorted_results = sorted(
+            formatted_results,
+            key=lambda x: (percent_to_float(x['Champion']),
+                           percent_to_float(x['ContinentalLeague']),
+                           percent_to_float(x['secondContLeague'])),
+            reverse=True  # Sort in descending order
+        )
 
-    return formatted_results
+
+    return sorted_results
+
+def percent_to_float(percent_str):
+    return float(percent_str.strip('%'))  # Convert '9.0%' to 9.0
+
+# Sort the list
 
 
 def get_last_5_home_away_wins(team_name, played_games):

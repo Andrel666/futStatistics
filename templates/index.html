@@ -5,6 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Football Statistics</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        section, nav {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        label {
+            margin-right: 15px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        img {
+            max-width: 30px;
+            height: auto;
+        }
+        @media (max-width: 600px) {
+            nav ul li {
+                display: block;
+                margin-bottom: 10px;
+            }
+            table, th, td {
+                font-size: 14px;
+            }
+        }
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -25,20 +89,15 @@
         <ul>
             <li><a href="#" onclick="fetchTeams()">Get Teams</a></li>
             <li><a href="#" onclick="fetchGames()">Get Games</a></li>
-            <li><a href="#" onclick="exportTableData()" style="display: none;">Export</a></li>
+            <li><input type="file" id="csv-file" accept=".csv" onchange="loadTeamsFromCSV(event)"></li>
+            <li><button onclick="saveTeamsToCSV()">Save Teams to CSV</button></li>
             <li><a href="#" onclick="generateStatistics()">Calculate</a></li>
-            <li>
-                <input type="file" id="csv-file" accept=".csv" onchange="loadTeamsFromCSV(event)">
-            </li>
-            <li>
-                <button onclick="saveTeamsToCSV()">Save Teams to CSV</button>
-            </li>
+            <li><a href="#" onclick="exportTableData()">Export</a></li>
         </ul>
     </nav>
 
-    <!-- Table to display fetched data -->
     <section>
-        <table id="file-table" border="1">
+        <table id="file-table">
             <thead>
                 <tr id="table-header"></tr>
             </thead>
@@ -114,8 +173,9 @@
                     if (country === 'BR') {
                         preLibertadoresCell = `<td>${item.preLibertadores}</td>`;
                     }
+                    const logoUrl = `https://images.fotmob.com/image_resources/logo/teamlogo/${item.id}_small.png`;
                     row.innerHTML = `
-                        <td>${item.team}</td>
+                        <td><img src="${logoUrl}" width="30"> ${item.team}</td>
                         <td>${item.Champion}</td>
                         <td>${item.ContinentalLeague}</td>
                         ${preLibertadoresCell}
