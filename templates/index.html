@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Football Statistics</title>
     <link rel="stylesheet" href="/static/styles.css">
-    <style>
-
-    </style>
 </head>
 <body>
     <header>
@@ -26,8 +23,8 @@
 
     <nav>
         <ul>
-            <li><a href="#" onclick="fetchTeams()">Get Teams</a></li>
-            <li><a href="#" onclick="fetchGames()">Get Games</a></li>
+            <li><a href="#" onclick="fetchData(`teams`)">Get Teams</a></li>
+            <li><a href="#" onclick="fetchData(`games`)">Get Games</a></li>
             <li>
                 <input type="file" id="csv-file" accept=".csv" onchange="loadTeamsFromCSV(event)">
             </li>
@@ -49,86 +46,219 @@
 
 
     <script>
+        const rightAlignedFields = [ 'Time_Home'];
+        const centerAlignedFields = ['Position' ,'score','Points'];
+        const translations = {
+            "ContinentalLeague": {
+                "ENG": "Champions League",
+                "BR": "Libertadores"
+            },
+            "preLibertadores": {
+                "ENG": "N/A",
+                "BR": "Pre Libertadores"
+            },
+            "Champoin": {
+                "ENG": "Champion",
+                "BR": "Campeāo"
+            },
+            "secondContLeague": {
+                "ENG": "Europe League",
+                "BR": "Sul Americana"
+            },
+            "Relegated": {
+                "ENG": "Relagations",
+                "BR": "Rebaixamento"
+            },
+            "Time": {
+                "ENG": "Team",
+                "BR": "Time"
+            },
+            "Points": {
+                "ENG": "Points",
+                "BR": "Pontos"
+            },
+            "type": {
+                "ENG": "Power",
+                "BR": "Tradiçāo/Força"
+            },
+            "score": {
+                "ENG": "X",
+                "BR": "X"
+            },
+            "Time_Home": {
+                "ENG": "Home Team",
+                "BR": "Casa"
+            },
+            "Time_Away": {
+                "ENG": "Away Team",
+                "BR": "Visitante"
+            },
+            "Position": {
+                "ENG": "Position",
+                "BR": "Colocaçāo"
+            },
+            // Add more headers as needed
+        };
+
         function getSelectedCountry() {
             const country = document.querySelector('input[name="country"]:checked').value;
             return country;
         }
 
-        function fetchTeams() {
+        function fetchData(activity) {
             const country = getSelectedCountry();  // Get the selected country
-            fetch(`/get_teams?country=${country}`)
+            fetch(`/get_${activity}?country=${country}`)
                 .then(response => response.json())
                 .then(data => {
-                    createTableHeader(['Logo', 'Position', 'Name', 'Points', 'Type']);
-                    createTableRows(data, `teams`);
+                    populateTableFromJson(data, `file-table`);
                 });
         }
 
-        function fetchGames() {
-            const country = getSelectedCountry();  // Get the selected country
-            fetch(`/get_games?country=${country}`)
-                .then(response => response.json())
-                .then(data => {
-                    createTableHeader(['Home Team', 'Score', 'Away Team']);
-                    createTableRows(data, `games`);
-                });
+        function createHeaderCell(key) {
+            const th = document.createElement("th");
+            let headerText = key;  // Default header text is the key
+
+            if (key === 'Time_Away') {
+                headerText = 'Time Away';  // Override for 'Time_Away'
+            } else if (key === 'Time_Home') {
+                headerText = 'Time Home';  // Override for 'Time_Home'
+            }
+
+            th.appendChild(document.createTextNode(headerText));
+            th.dataset.key = key;  // Attach data-key for identification
+            return th;
         }
 
-        function createTableHeader(headers) {
-            const headerRow = document.getElementById('table-header');
-            headerRow.innerHTML = '';  // Clear previous headers
-
-            headers.forEach(header => {
-                const th = document.createElement('th');
-                th.textContent = header;
-                headerRow.appendChild(th);
-            });
+        function appendHiddenClass(th, key) {
+            if (key === 'id' || key.toLowerCase() === 'name' ||
+                key.toLowerCase() === 'name_away' || key.toLowerCase() === 'name_home') {
+                th.classList.add('hidden');  // Add 'hidden' class
+            }
         }
 
-        function createTableRows(data, activity) {
-            const tableBody = document.getElementById('table-body');
-            const country = getSelectedCountry();  // Get the selected country
+        function translateHeader(headerKey, lang) {
+            const header = translations[headerKey];
+            return header ? header[lang] || header["ENG"] : headerKey; // Fallback to English if translation is not available
+        }
 
-            tableBody.innerHTML = '';  // Clear previous table rows
+         // Append alignment classes dynamically based on key
+        function appendAlignmentClass(cell, key) {
+            console.log(rightAlignedFields)
+            console.log(key)
+            if (rightAlignedFields.includes(key)) {
+                cell.classList.add('right-align');  // Add right alignment
+                console.log('right ' + key)
+            } else if (centerAlignedFields.includes(key)) {
+                cell.classList.add('center-align');  // Add center alignment
+            }
+        }
 
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                //console.log(data)
-                if (activity == `teams`) {
-                    const logoUrl = `https://images.fotmob.com/image_resources/logo/teamlogo/${item.id}_small.png`; // Adjust your image path as needed
-                    row.innerHTML = `
-                        <td><img src="${logoUrl}" alt="Team Logo" width="30"></td>
-                        <td>${item.idx}</td>
-                        <td>${item.name}</td>
-                        <td>${item.pts}</td>
-                        <td><input type="number" min="1" max="5" value="${item.type}"></td>
-                    `;
-                } else if (activity == `games`) {
-                    const homeLogoUrl = `https://images.fotmob.com/image_resources/logo/teamlogo/${item.homeID}_small.png`;
-                    const awayLogoUrl = `https://images.fotmob.com/image_resources/logo/teamlogo/${item.awayID}_small.png`;
-                    row.innerHTML = `
-                        <td class="home-team">${item.home} <img src="${homeLogoUrl}" alt="Home Team Logo" width="30"></td>
-                        <td class="score">${item.score}</td>
-                        <td class="away-team"><img src="${awayLogoUrl}" alt="Away Team Logo" width="30"> ${item.away}</td>
-                    `;
-                } else  {
-                    let preLibertadoresCell = '';
-                    if (country === 'BR') {
-                        preLibertadoresCell = `<td>${item.preLibertadores}</td>`;
+        function createTeamContainer(logoUrl, teamName, isHomeTeam) {
+            const container = document.createElement('div');
+            container.classList.add(isHomeTeam ? 'home-team' : 'away-team'); // Apply the appropriate class
+
+            if (isHomeTeam) {
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = teamName;
+                nameSpan.style.marginLeft = isHomeTeam ? '5px' : '5px'; // Add space between logo and name
+                container.appendChild(nameSpan); // Append name to the container
+
+                const img = document.createElement('img');
+                img.src = logoUrl;
+                img.alt = isHomeTeam ? "Home Team Logo" : "Away Team Logo";
+                img.width = 30; // Set image width
+                container.appendChild(img); // Append logo to the container
+            }
+            else {
+                const img = document.createElement('img');
+                img.src = logoUrl;
+                img.alt = isHomeTeam ? "Home Team Logo" : "Away Team Logo";
+                img.width = 30; // Set image width
+                container.appendChild(img); // Append logo to the container
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = teamName;
+                nameSpan.style.marginLeft = isHomeTeam ? '5px' : '5px'; // Add space between logo and name
+                container.appendChild(nameSpan); // Append name to the container
+            }
+            return container;
+        }
+
+        // Remaining code remains the same
+        function populateTableFromJson(jsonResponse, tableId) {
+            const table = document.getElementById(tableId);
+            table.innerHTML = ''; // Clear the table before adding new content
+
+            // Get the keys from the first item in the response to determine column order
+            //const keys = Object.keys(jsonResponse[0]);
+            const keys = ['Time_Home', 'score', 'Time_Away', 'Position', 'Time', 'Points', 'type', 'Champion', 'ContinentalLeague', 'preLibertadores', 'secondContLeague', 'Relegated', 'id', 'name'];  // Example fixed order
+
+
+            // Create table header
+            const thead = table.createTHead();
+            const headerRow = thead.insertRow();
+            keys.forEach(key => {
+                if (jsonResponse.length > 0 && jsonResponse.some(item => key in item)) {  // Check if the key exists in at least one JSON object
+                    const country = getSelectedCountry();  // Get the selected country
+                    const th = createHeaderCell(translateHeader(key, country)); // Use translateHeader to get the translated title
+                    //Andre 14/10 this was before translation
+                    //const th = createHeaderCell(key);
+                    appendHiddenClass(th, key);  // Add hidden class where needed
+                    console.log( th)
+                    console.log(key)
+                    appendAlignmentClass(th, key);  // Add alignment class based on the key
+                    headerRow.appendChild(th);   // Append the header cell to the row
+
                     }
-                    const logoUrl = `https://images.fotmob.com/image_resources/logo/teamlogo/${item.id}_small.png`;
-                    row.innerHTML = `
-                        <td><img src="${logoUrl}" width="30"> ${item.team}</td>
-                        <td>${item.Champion}</td>
-                        <td>${item.ContinentalLeague}</td>
-                        ${preLibertadoresCell}
-                        <td>${item.secondContLeague}</td>
-                        <td>${item.Relegated}</td>
-                    `;
-                }
-                tableBody.appendChild(row);
+            });
+
+            // Create table body
+            const tbody = table.createTBody();
+            jsonResponse.forEach(item => {
+                const row = tbody.insertRow();
+                keys.forEach(key => {
+                    if (key in item) {  // Only create cells for keys that exist in the current item
+                        const cell = row.insertCell();
+                        const value = item[key];
+
+
+                        // Always add the accessKey as the key for all fields
+                        cell.dataset.accesskey = key;
+
+                        if (key === 'Time' && typeof value === 'string' && value.startsWith('http')) {
+                            const teamContainer = createTeamContainer(value, item['Name'], false);
+                            cell.appendChild(teamContainer);
+                        } else if (key === 'Time_Home' && typeof value === 'string' && value.startsWith('http')) {
+                            const homeTeamContainer = createTeamContainer(value, item['Name_Home'], true);
+                            cell.appendChild(homeTeamContainer);
+                        } else if (key === 'Time_Away' && typeof value === 'string' && value.startsWith('http')) {
+                            const awayTeamContainer = createTeamContainer(value, item['Name_Away'], false);
+                            cell.appendChild(awayTeamContainer);
+                        } else if (key === 'type') {
+                            const input = document.createElement('input');
+                            input.type = 'number';
+                            input.min = 1;
+                            input.max = 5;
+                            input.value = value;
+                            cell.appendChild(input);
+                        } else if (key === 'score') {
+                            const scoreSpan = document.createElement('span');
+                            scoreSpan.classList.add('score');
+                            scoreSpan.textContent = value; // Assuming value is the score
+                            cell.appendChild(scoreSpan);
+                        } else {
+                            cell.appendChild(document.createTextNode(value));
+                        }
+
+                        // Add alignment dynamically
+                        appendAlignmentClass(cell, key);
+                        appendHiddenClass(cell, key); // Add hidden class to the cell
+                        //console.log(cell)
+                    }
+                });
             });
         }
+
 
         function loadTeamsFromCSV(event) {
 
@@ -142,23 +272,37 @@
             })
             .then(response => response.json())
             .then(data => {
-                createTableHeader(['Logo', 'Position', 'Name', 'Points', 'Type']);
-                createTableRows(data, `teams`);
+                    populateTableFromJson(data, `file-table`);
             });
         }
 
+
         function saveTeamsToCSV() {
-            const rows = document.querySelectorAll('#file-table tbody tr');
+            const rows = document.querySelectorAll('#file-table tbody tr'); // Get all rows from the table body
             const data = [];
 
             rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                const id = cells[0].querySelector('img').src.split('/').slice(-1)[0].split('_')[0]; // Get team ID from logo URL
-                const type = cells[4].querySelector('input').value;
+                const cells = row.querySelectorAll('td'); // Get all cells in the current row
 
-                data.push({ id, type });
+                // First, check all cells for the correct 'data-accesskey'
+                //const allKeys = Array.from(cells).map(cell => cell.getAttribute('data-accesskey'));
+                //console.log('All data-accesskeys:', allKeys); // Debug output to check what all cells contain
+
+                // Then, find the cell with the 'id' accessKey
+                const idCell = Array.from(cells).find(cell => cell.getAttribute('data-accesskey') === 'id');
+                //console.log('idCell:', idCell); // Debug output to check what idCell contains
+
+                const id = idCell ? idCell.textContent.trim() : null; // Convert to number or set to null if not found
+                //console.log('ID:', id); // Log the final ID value
+
+                // Find the 'power' input field, assuming it's in the cell where 'Power' was rendered
+                const powerCell = Array.from(cells).find(cell => cell.querySelector('input[type="number"]'));
+                const type = powerCell ? powerCell.querySelector('input').value : null; // Get the value of the input field
+
+                data.push({ id, type }); // Add the object to data
             });
 
+            //console.log(data); // Check the final array of data
             fetch('/save_teams_to_csv', {
                 method: 'POST',
                 headers: {
@@ -175,56 +319,56 @@
             });
         }
 
-function generateStatistics() {
-    const country = getSelectedCountry();  // Get the selected country
-    const country_data = { country };  // Create an object with the selected country
+        function generateStatistics() {
+            const country = getSelectedCountry();  // Get the selected country
+            const country_data = { country };  // Create an object with the selected country
 
-    const rows = document.querySelectorAll('#file-table tbody tr');
-    const data = [];
+            const rows = document.querySelectorAll('#file-table tbody tr');
+            const data = [];
 
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        const id = cells[0].querySelector('img').src.split('/').slice(-1)[0].split('_')[0]; // Get team ID from logo URL
-        const type = cells[4].querySelector('input').value;
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const idCell = Array.from(cells).find(cell => cell.getAttribute('data-accesskey') === 'id');
+                const id = idCell ? idCell.textContent.trim() : null; // Convert to number or set to null if not found
+                //console.log('ID:', id); // Log the final ID value
 
-        data.push({ id, type });
-    });
+                const powerCell = Array.from(cells).find(cell => cell.querySelector('input[type="number"]'));
+                const type = powerCell ? powerCell.querySelector('input').value : null; // Get the value of the input field
 
-    // Select the body or container to apply the loading class
-    const container = document.body; // You can specify a more specific container if needed
+                data.push({ id, type }); // Add the object to data
+            });
 
-    // Add loading class
-    container.classList.add('loading');
+            // Select the body or container to apply the loading class
+            const container = document.body; // You can specify a more specific container if needed
 
-    fetch('/statistics', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ country: country_data, teams: data })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+            // Add loading class
+            container.classList.add('loading');
+
+            fetch('/statistics', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ country: country_data, teams: data })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();  // Parse JSON from the response
+            })
+            .then(data => {
+                populateTableFromJson(data, `file-table`);
+
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            })
+            .finally(() => {
+                // Remove loading class after the fetch operation
+                container.classList.remove('loading');
+            });
         }
-        return response.json();  // Parse JSON from the response
-    })
-    .then(data => {
-        if (country === 'BR') {
-            createTableHeader(['Time', 'Campeao', 'Libertadores', 'pre-Libertadores', 'Sul Americana', 'Rebaixado']);
-        } else {
-            createTableHeader(['Team', 'Champion', 'Champions League', 'Europe League', 'Relegated']);
-        }
-        createTableRows(data, 'statistic');
-    })
-    .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-    })
-    .finally(() => {
-        // Remove loading class after the fetch operation
-        container.classList.remove('loading');
-    });
-}
 
 
         function exportTableData() {
@@ -253,40 +397,7 @@ function generateStatistics() {
                     console.error('There was a problem with the fetch operation:', error);
                 });
         }
-        function exportTableData2() {
-            const rows = document.querySelectorAll('#file-table tbody tr');
-            const data = [];
 
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                let rowData = {};
-
-                if (cells.length === 5) {
-                    rowData['shortName'] = cells[2].textContent.trim();
-                    rowData['position'] = cells[1].textContent.trim();
-                    rowData['pts'] = cells[3].textContent.trim();
-                    rowData['type'] = cells[4].querySelector('input').value;
-                } else if (cells.length === 3) {
-                    rowData['home'] = cells[0].textContent.trim();
-                    rowData['score'] = cells[1].textContent.trim();
-                    rowData['away'] = cells[2].textContent.trim();
-                }
-
-                data.push(rowData);
-            });
-
-            fetch('/export', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log('Export successful:', result);
-            });
-        }
     </script>
 </body>
 </html>

@@ -131,14 +131,27 @@ img {
 
 
 .home-team {
-    justify-content: flex-end;  /* Align home team to the right */
-    text-align: right;          /* Text-align for the text */
+    justify-content: flex-end; /* Align home team to the right */
+    text-align: right;         /* Text-align for the text */
+    display: flex;             /* Use flexbox for layout */
+    align-items: center;       /* Center vertically */
 }
 
 .away-team {
     justify-content: flex-start; /* Align away team to the left */
     text-align: left;            /* Text-align for the text */
+    display: flex;               /* Use flexbox for layout */
+    align-items: center;         /* Center vertically */
 }
+
+.home-team img,
+.away-team img {
+    margin-left: 5px;           /* Space between logo and name */
+    margin-right: 5px;          /* Additional spacing */
+}
+
+
+
 .score {
     display: flex; /* Make the parent a flex container */
     justify-content: center; /* Center the content */
@@ -241,4 +254,13 @@ section {
         }
         .hidden {
             display: none; /* Hides the element */
+            /*table-cell;  for show in debug */
+        }
+
+        .right-align {
+            text-align: right !important;
+        }
+
+        .center-align {
+            text-align: center !important;
         }

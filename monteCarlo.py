@@ -109,7 +109,7 @@ def simulate_season(teams, matches, country, n_iterations=50000 ):
 
         # Simulate each match
         for match in matches:
-            home_team, away_team = match["home"], match["away"]
+            home_team, away_team = match["Name_Home"], match["Name_Away"]
             home_strength = simulated_teams[home_team]["strength_home"]
             away_strength = simulated_teams[away_team]["strength_away"]
             home_type = simulated_teams[home_team]["type"]
@@ -138,7 +138,7 @@ def simulate_season(teams, matches, country, n_iterations=50000 ):
             end = len(sorted_teams) if end is None else end
 
             for idx, team in enumerate(sorted_teams[start:end]):
-                results[team["name"]][position_name] += 1
+                results[team["shortName"]][position_name] += 1
 
     # Convert counts to probabilities
     for team in results:
@@ -156,10 +156,12 @@ def format_results(results, teams):
     formatted_results = []
     team_id_map = {team['shortName']: team['id'] for team in teams}
 
+
     for team, data in results.items():
         # Create a dictionary for each team
-        formatted_team_data = {'team': team}
+        formatted_team_data = {'Name': team}
         formatted_team_data['id'] = team_id_map.get(team, None)
+        formatted_team_data['Time'] = f'https://images.fotmob.com/image_resources/logo/teamlogo/{team_id_map.get(team, None)}_small.png'
 
         # Loop over each position and add its description and probability to the dictionary
         # Loop over each position and add its description and probability to the dictionary
@@ -206,14 +208,14 @@ def get_last_5_home_away_wins(team_name, played_games):
         home_score, away_score = map(int, game["score"].split(" - "))
 
         # Check if the team played at home
-        if game["home"] == team_name and home_games_played < 5:
+        if game["Name_Home"] == team_name and home_games_played < 5:
             home_games.append(game)
             home_games_played += 1
             # Check if it was a win for the home team
             if home_score > away_score:
                 home_wins += 1
         # Check if the team played away
-        elif game["away"] == team_name and away_games_played < 5:
+        elif game["Name_Away"] == team_name and away_games_played < 5:
             away_games.append(game)
             away_games_played += 1
             # Check if it was a win for the away team
@@ -247,7 +249,7 @@ def calculate_statistics(input_teams,matches, country='BR'):
     # Generate team strength based on points and type
     for input_team in input_teams:
         #games_played = 30  # Assuming every team has played 30 games (can adjust this)
-        input_team['strength_home'], input_team['strength_away'] = calculate_team_strength(input_team['name'],
+        input_team['strength_home'], input_team['strength_away'] = calculate_team_strength(input_team['shortName'],
                                                                                            int(input_team['pts']),
                                                                                            played_games,
                                                                                            int(input_team['type']))
